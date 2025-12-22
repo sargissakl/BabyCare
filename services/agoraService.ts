@@ -2,12 +2,21 @@ import { getSupabaseClient } from '@/template';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
-// Import Agora SDK
-import { createAgoraRtcEngine } from 'react-native-agora';
-import type { IRtcEngine, ChannelProfileType, ClientRoleType } from 'react-native-agora';
+// Type definitions for Agora
+type IRtcEngine = any;
+type ChannelProfileType = any;
+type ClientRoleType = any;
 
-// Agora SDK is now available in all builds
-const AgoraSDK = { createAgoraRtcEngine };
+// Conditionally import Agora SDK - only available when installed
+let createAgoraRtcEngine: any = null;
+try {
+  // This will only work when react-native-agora is installed (in APK builds)
+  const agoraSdk = require('react-native-agora');
+  createAgoraRtcEngine = agoraSdk.createAgoraRtcEngine;
+  console.log('✅ Agora SDK loaded successfully');
+} catch (error) {
+  console.log('⚠️ Agora SDK not available (development mode)');
+}
 
 export interface AgoraTokenResponse {
   token: string;
@@ -64,6 +73,14 @@ export async function initializeAgora(): Promise<{ success: boolean; error?: str
       return {
         success: false,
         error: '🚀 Real-time babyfoon werkt alleen in de mobiele app. Download de APK via de download knop rechtsboven!',
+      };
+    }
+
+    // Check if Agora SDK is available
+    if (!createAgoraRtcEngine) {
+      return {
+        success: false,
+        error: '🚀 Real-time audio streaming is alleen beschikbaar in de APK build. Test gewoon verder - het werkt wel in de uiteindelijke APK!',
       };
     }
 

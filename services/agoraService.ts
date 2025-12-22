@@ -2,14 +2,12 @@ import { getSupabaseClient } from '@/template';
 import { FunctionsHttpError } from '@supabase/supabase-js';
 import { Platform } from 'react-native';
 
-// Type definitions for Agora (when installed)
-type IRtcEngine = any;
-type ChannelProfileType = any;
-type ClientRoleType = any;
+// Import Agora SDK
+import { createAgoraRtcEngine } from 'react-native-agora';
+import type { IRtcEngine, ChannelProfileType, ClientRoleType } from 'react-native-agora';
 
-// Agora SDK - only available in production EAS builds
-// NOT loaded in preview to avoid dependency conflicts
-const AgoraSDK: any = null;
+// Agora SDK is now available in all builds
+const AgoraSDK = { createAgoraRtcEngine };
 
 export interface AgoraTokenResponse {
   token: string;
@@ -61,14 +59,11 @@ export async function generateAgoraToken(
 
 export async function initializeAgora(): Promise<{ success: boolean; error?: string }> {
   try {
-    // Agora real-time audio only works in the APK build
-    if (!AgoraSDK) {
-      const errorMsg = Platform.OS === 'web' 
-        ? '🚀 Real-time babyfoon werkt alleen in de mobiele app. Download de APK via de download knop rechtsboven!'
-        : '🚀 Real-time babyfoon werkt alleen in de APK build. Download de APK om deze feature te gebruiken!';
+    // Check for web platform (Agora doesn't support web in React Native)
+    if (Platform.OS === 'web') {
       return {
         success: false,
-        error: errorMsg,
+        error: '🚀 Real-time babyfoon werkt alleen in de mobiele app. Download de APK via de download knop rechtsboven!',
       };
     }
 
@@ -78,7 +73,7 @@ export async function initializeAgora(): Promise<{ success: boolean; error?: str
     }
 
     console.log('🚀 Initializing Agora Engine...');
-    agoraEngine = AgoraSDK.createAgoraRtcEngine();
+    agoraEngine = createAgoraRtcEngine();
     
     // Placeholder appId - will be replaced with real one from token
     agoraEngine.initialize({

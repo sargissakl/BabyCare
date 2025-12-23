@@ -1,267 +1,359 @@
-# 🚀 BabyCare - Agora Real-Time Build Instructies
+# 🚀 BabyCare - Development Build Instructies (VANAVOND)
 
-## ⚠️ BELANGRIJKE VOORBEREIDING
+## ⚠️ WAAROM DEVELOPMENT BUILD?
 
-Agora real-time streaming vereist **native code compilation**. Dit betekent dat je **NIET** de OnSpace "Download APK" knop kunt gebruiken. Je moet de app lokaal bouwen met EAS Build.
+De Agora babyfoon werkt **ALLEEN** in een native build omdat:
+- ❌ OnSpace preview app ondersteunt geen native modules
+- ❌ OnSpace "Download APK" knop maakt managed builds (geen Agora)
+- ✅ **Development build** compileert Agora SDK + geeft real-time audio
+
+**2 OPTIES:**
+- **OPTIE A**: EAS Development Build (geen kabel nodig) - **AANBEVOLEN** ⭐
+- **OPTIE B**: Lokale Build (vereist Android Studio + USB kabel)
 
 ---
 
-## 📦 STAP 1: Code Exporteren naar GitHub
+## 📦 VOORBEREIDENDE STAPPEN (DOE DIT NU)
 
-### 1.1 OnSpace → GitHub Sync
-1. **Klik rechtsboven** op de **GitHub knop** 🔗
-2. **Connect je GitHub account** (als nog niet gedaan)
-3. **Kies repository naam**: bijv. `babycare-app`
-4. **Klik "Sync"** - code wordt ge-upload
-5. **Wacht tot sync compleet is** ✅
+### ✅ Controleer of Git Sync Werkt
 
-### 1.2 Clone Project Lokaal
-Open **Terminal** of **Command Prompt**:
+OnSpace project is al gelinkt met GitHub (`https://github.com/sargissakl/BabyCare`).
 
+**Test of sync werkt:**
 ```bash
-# Ga naar je gewenste map
-cd Documents
+cd C:\Users\semmi\Documents\BabyCare
+git status
+git pull
+```
 
-# Clone het project (vervang USERNAME)
-git clone https://github.com/USERNAME/babycare-app.git
-
-# Ga naar de project folder
-cd babycare-app
+Als dit werkt → ga naar OPTIE A. Anders → clone opnieuw:
+```bash
+cd C:\Users\semmi\Documents
+rmdir /s /q BabyCare
+git clone https://github.com/sargissakl/BabyCare.git
+cd BabyCare
 ```
 
 ---
 
-## 🛠️ STAP 2: Installeer Benodigdheden
+---
 
-```bash
-# Installeer dependencies
-npm install
+# 🟢 OPTIE A: EAS Development Build (AANBEVOLEN)
 
-# Installeer Agora SDK
-npm install react-native-agora@4.2.6 --save
+## STAP 1: Installeer Tools
+
+```cmd
+cd C:\Users\semmi\Documents\BabyCare
+
+# Installeer dependencies (met legacy peer deps voor React 19)
+npm install --legacy-peer-deps
+
+# Installeer Agora SDK (je hebt dit al gedaan)
+npm install react-native-agora@4.2.6 --legacy-peer-deps
 
 # Installeer EAS CLI globaal
 npm install -g eas-cli
+```
 
-# Login bij Expo (maak gratis account op expo.dev)
+## STAP 2: Login bij Expo
+
+```cmd
+# Login (maak gratis account op expo.dev als je die nog niet hebt)
 eas login
 ```
 
+**Vul in:**
+- Email/Username
+- Password
+
+(Als je nog geen account hebt: https://expo.dev/signup)
+
 ---
 
-## 🔑 STAP 3: Configureer Agora Credentials
+## STAP 3: Controleer Agora Secrets
 
-### Optie A: Vanuit OnSpace Backend (Aanbevolen)
-Je Agora credentials zijn al in OnSpace Cloud:
-1. Open OnSpace project
-2. Klik **Cloud** (rechtsboven)
-3. Ga naar **Secrets** tab
-4. Kopieer je `AGORA_APP_ID` en `AGORA_APP_CERTIFICATE`
+Je Agora credentials staan al in OnSpace Cloud Backend:
+- ✅ `AGORA_APP_ID`
+- ✅ `AGORA_APP_CERTIFICATE`
 
-### Optie B: Nieuwe Agora Account
-1. Ga naar https://console.agora.io/
-2. Maak gratis account
-3. Maak nieuw project
-4. Kopieer **App ID** en **App Certificate**
+Deze worden **automatisch** geïnjecteerd in de Edge Function (`generate-agora-token`).
 
-### Bewaar Credentials
-Maak een bestand `.env` in de project root:
+**Geen extra configuratie nodig!** De app haalt tokens op via de Edge Function.
 
-```bash
-# .env
-AGORA_APP_ID=jouw_app_id_hier
-AGORA_APP_CERTIFICATE=jouw_certificate_hier
+---
+
+## STAP 4: Start Development Build
+
+**eas.json** is al correct geconfigureerd met `development` profile.
+
+**Start de build:**
+
+```cmd
+eas build --platform android --profile development
 ```
 
----
+**Wat gebeurt er:**
+1. ⬆️ Code uploaden naar Expo servers
+2. 🔨 Native code compilatie (Agora SDK wordt geïnstalleerd)
+3. 📦 APK genereren met development client
+4. ⏱️ Duurt **15-25 minuten** (eerste keer)
 
-## 🏗️ STAP 4: Configureer EAS Build
-
-Het bestand `eas.json` is al aangemaakt. Nu configureren we de native build:
-
-```bash
-# Initialiseer EAS project
-eas build:configure
-```
-
-Beantwoord de vragen:
-- **Platform**: Android (of both)
-- **Create new project?**: Yes
+**Monitor de build:**
+- Terminal toont URL zoals: `https://expo.dev/builds/abc123`
+- Of ga naar: `https://expo.dev/accounts/[jouw-username]/builds`
+- Zie live logs van de build proces
 
 ---
 
-## 📱 STAP 5: Maak de Native Build
+## STAP 5: Download & Installeer APK
 
-### 5.1 Pre-build (Genereer Native Code)
-```bash
+### 5.1 Wacht Tot Build Klaar Is
+
+Wanneer de build **Finished** ✅ is:
+
+1. **Ga naar de build page** (URL uit terminal)
+2. **Klik op "Download"** knop
+3. **Scan QR code** met je telefoon OF download direct
+
+### 5.2 Installeer op Android
+
+1. **Open APK** op je telefoon
+2. **Sta installatie toe** van onbekende bronnen (Settings popup)
+3. **Installeer** BabyCare app
+
+### 5.3 Test de Babyfoon!
+
+1. Open app → **Monitor** tab
+2. **Klik "Start Monitoring"**
+3. **Toestemming geven** voor microfoon
+4. **QR code verschijnt** + 4-cijferige code
+
+**Op 2e apparaat (andere telefoon/tablet):**
+1. Scan de QR code OF
+2. Open app → Watch tab → voer 4-cijferige code in
+3. **Audio stream begint!** 🎙️
+
+**Verwachte resultaten:**
+- ✅ Real-time audio (<300ms vertraging)
+- ✅ Geluidsniveau visualisatie
+- ✅ Automatische alerts bij hard geluid
+- ✅ GEEN "werkt alleen in APK" melding meer!
+
+---
+
+---
+
+# 🔵 OPTIE B: Lokale Build (GEVORDERD)
+
+**Vereisten:**
+- ✅ Android Studio geïnstalleerd
+- ✅ Android SDK tools
+- ✅ Java JDK 17+
+- ✅ Android telefoon met USB kabel
+- ✅ USB debugging enabled
+
+## STAP 1: Genereer Native Code
+
+```cmd
+cd C:\Users\semmi\Documents\BabyCare
+
+# Installeer dependencies
+npm install --legacy-peer-deps
+
+# Genereer android/ folder
 npx expo prebuild --clean
 ```
 
-Dit genereert `android/` en `ios/` folders met native code.
+## STAP 2: Check Android Permissions
 
-### 5.2 Voeg Agora Dependencies Toe aan Android
+Open `android/app/src/main/AndroidManifest.xml` en controleer:
 
-Maak een bestand `android/app/build.gradle` patch (dit wordt automatisch gedaan door prebuild, maar controleer):
-
-```bash
-# Check of Agora permissions in AndroidManifest.xml staan
-cat android/app/src/main/AndroidManifest.xml
-```
-
-Zorg dat deze permissions er staan:
 ```xml
 <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-<uses-permission android:name="android.permission.CAMERA"/>
 <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS"/>
-<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
 <uses-permission android:name="android.permission.INTERNET"/>
 ```
 
-### 5.3 Start EAS Build
-```bash
-eas build --platform android --profile production
-```
+(Deze staan er al in via `app.json` configuratie)
 
-### Wat gebeurt er?
-1. **Uploadt code** naar Expo servers
-2. **Compileert native modules** (inclusief Agora)
-3. **Genereert APK**
-4. **Tijd**: ~15-25 minuten (eerste keer)
+## STAP 3: Build en Installeer
 
-### Monitor de Build
-- URL verschijnt in terminal (bijv. `https://expo.dev/builds/abc123`)
-- Of ga naar: https://expo.dev/accounts/[username]/builds
-- Live logs tonen de voortgang
-
----
-
-## 📥 STAP 6: Download en Installeer APK
-
-### 6.1 Download
-Wanneer build **Finished** ✅:
-1. Klik op build in https://expo.dev/builds
-2. **Download** knop verschijnt
-3. Download APK naar telefoon (via QR code of direct link)
-
-### 6.2 Installeer
-1. Open APK op Android telefoon
-2. **Sta installatie toe** van onbekende bronnen
-3. **Installeer** BabyCare app
-
-### 6.3 Test Real-Time Audio
-1. Open app → **Monitor** tab
-2. **"Start Monitoring"** - krijg 4-cijferige code
-3. 2e apparaat: Scan QR of voer code in
-4. **Test audio** - <300ms latency! 🎉
-
----
-
-## 🔧 Alternatieve Methode: Lokale Build (Gevorderd)
-
-Als je Android Studio hebt geïnstalleerd:
-
-```bash
-# Build lokaal
+**Optie 3A: Met Expo CLI (makkelijkst)**
+```cmd
 npx expo run:android --variant release
-
-# Of met React Native CLI
-cd android
-./gradlew assembleRelease
 ```
 
-APK locatie: `android/app/build/outputs/apk/release/app-release.apk`
+**Optie 3B: Met Gradle direct**
+```cmd
+cd android
+.\gradlew assembleRelease
+```
+
+APK locatie: `android\app\build\outputs\apk\release\app-release.apk`
+
+**Installeer:**
+```cmd
+adb install android\app\build\outputs\apk\release\app-release.apk
+```
 
 ---
 
-## 🐛 Troubleshooting
+---
 
-### Build Failed?
+# ⚠️ VERWACHTE PROBLEMEN & OPLOSSINGEN
+
+---
+
+## ❌ "EAS Build Failed"
+
 **Check de logs** op expo.dev/builds voor exacte error.
 
-**Veelvoorkomende fixes:**
-
-```bash
-# Clear cache
-rm -rf node_modules
-npm install
-eas build --platform android --clear-cache
-
-# Rebuild prebuild
-npx expo prebuild --clean
+**Meest voorkomende fix:**
+```cmd
+# Wis cache en herbouw
+eas build --platform android --profile development --clear-cache
 ```
 
-### "Agora SDK not initialized" in app?
-1. **Check permissions**: App Settings → Permissions → Microphone ON
-2. **Check credentials**: Zorg dat AGORA_APP_ID correct is
-3. **Rebuild**: Mogelijk verkeerde build gebruikt
+**Als het blijft falen:**
+```cmd
+# Verwijder node_modules lokaal
+rmdir /s /q node_modules
+npm install --legacy-peer-deps
 
-### Audio werkt niet?
-1. **Internet**: Beide apparaten online
-2. **Firewall**: Agora gebruikt UDP ports
-3. **Agora status**: Check console.agora.io voor usage/errors
+# Probeer opnieuw
+eas build --platform android --profile development
+```
 
-### "Cannot find module react-native-agora"?
-Dit betekent dat je de OnSpace preview gebruikt in plaats van de EAS build:
-- ✅ **Gebruik de gedownloade APK** van EAS Build
-- ❌ **NIET de OnSpace "Download APK" knop** (ondersteunt geen Agora)
+## ❌ "Unable to resolve module" tijdens build
 
----
+Dit is de React Native 0.79.3 bug die we eerder zagen.
 
-## 💰 Kosten
-
-### Expo EAS Build
-- **Gratis tier**: 30 builds/maand
-- **Meer nodig?**: $29/maand voor onbeperkt
-
-### Agora
-- **Gratis tier**: 10.000 minuten/maand
-- **Betaald**: $0.99 per 1000 minuten
-- **Voor hobbyist**: Ruim voldoende gratis
-
----
-
-## 🔄 Updates Pushen
-
-Na code wijzigingen:
-
-```bash
-# Commit changes
-git add .
-git commit -m "Update audio features"
-git push
-
-# Nieuwe build
+**Fix:**
+```cmd
+# Gebruik production profile (meer stabiel)
 eas build --platform android --profile production
 ```
 
+Production build werkt ook, maar development build heeft:
+- ✅ Snellere reload tijdens testen
+- ✅ Debug tools ingebouwd
+
+## ❌ "Agora SDK not initialized" in de app
+
+**Oorzaken:**
+1. **Verkeerde build**: Je gebruikt nog steeds OnSpace preview
+   - ✅ **Oplossing**: Gebruik ALLEEN de APK van EAS build
+2. **Geen microfoon permission**: App heeft geen toegang
+   - ✅ **Oplossing**: Settings → Apps → BabyCare → Permissions → Microphone ON
+3. **Agora credentials fout**: Backend secrets zijn leeg
+   - ✅ **Oplossing**: Check OnSpace Cloud → Secrets tab
+
+## ❌ Audio stream werkt niet (geen geluid)
+
+**Checklist:**
+1. ✅ Beide apparaten hebben **internet** (WiFi of 4G)
+2. ✅ Monitoring apparaat heeft **microfoon permission**
+3. ✅ Watching apparaat heeft **geluid** niet op mute
+4. ✅ **Firewall** blokkeert geen UDP traffic (Agora gebruikt UDP)
+5. ✅ **4-cijferige code** correct ingevoerd
+
+**Test:**
+```
+1. Start monitoring → praat in microfoon
+2. Check groene "Audio Level" bars → beweegt?
+   - JA: Microfoon werkt, probleem bij netwerk/watching apparaat
+   - NEE: Microfoon permission issue
+```
+
+## ❌ "Cannot find module react-native-agora"
+
+**Dit betekent:**
+Je gebruikt **NIET** de EAS development build.
+
+**Oplossing:**
+- ❌ **STOP met** OnSpace preview app gebruiken
+- ❌ **STOP met** OnSpace "Download APK" knop gebruiken
+- ✅ **GEBRUIK ALLEEN** de APK van EAS build (expo.dev/builds)
+
 ---
 
-## ✅ Complete Checklist
+---
 
-**Voorbereiding:**
-- [ ] Code op GitHub
-- [ ] Project lokaal gecloned
-- [ ] Node modules geïnstalleerd (`npm install`)
-- [ ] Agora SDK geïnstalleerd
-- [ ] EAS CLI geïnstalleerd globaal
+## 💰 KOSTEN
 
-**Configuratie:**
-- [ ] Expo account aangemaakt (expo.dev)
-- [ ] Agora credentials (App ID + Certificate)
-- [ ] `.env` bestand aangemaakt met credentials
-- [ ] `eas build:configure` uitgevoerd
+### Expo EAS Build
+- ✅ **Gratis tier**: 30 builds/maand (ruim voldoende)
+- 💵 **Meer nodig**: $29/maand voor onbeperkt
 
-**Build:**
-- [ ] `npx expo prebuild --clean` succesvol
-- [ ] Android permissions gecheckt
-- [ ] `eas build --platform android` gestart
-- [ ] Build status **Finished** (groen)
+### Agora Real-Time
+- ✅ **Gratis tier**: 10.000 minuten/maand
+- 💵 **Betaald**: $0.99 per 1000 minuten daarna
+- 📊 **Voor deze app**: 1 uur babyfoon/dag = ~30 uur/maand = **GRATIS**
 
-**Testing:**
-- [ ] APK gedownload van expo.dev
-- [ ] App geïnstalleerd op telefoon
-- [ ] Microphone permission toegestaan
-- [ ] Real-time audio werkt <300ms! 🎉
+---
+
+---
+
+## 🔄 UPDATES PUSHEN (LATER)
+
+Wanneer je code wijzigt:
+
+```cmd
+# In OnSpace: maak wijzigingen
+# Klik GitHub knop → Sync
+
+# Lokaal: pull changes
+cd C:\Users\semmi\Documents\BabyCare
+git pull
+
+# Maak nieuwe build
+eas build --platform android --profile development
+```
+
+---
+
+---
+
+## ✅ COMPLETE CHECKLIST (VANAVOND)
+
+### Voorbereiding (5 min)
+- [ ] Open Command Prompt
+- [ ] `cd C:\Users\semmi\Documents\BabyCare`
+- [ ] `git pull` (haal laatste code op)
+- [ ] `npm install --legacy-peer-deps`
+
+### EAS Setup (10 min)
+- [ ] `npm install -g eas-cli`
+- [ ] `eas login` (maak account op expo.dev)
+- [ ] Agora secrets check (OnSpace Cloud → Secrets tab)
+
+### Build Starten (2 min)
+- [ ] `eas build --platform android --profile development`
+- [ ] Wacht op build URL in terminal
+- [ ] Open URL in browser om voortgang te zien
+
+### Wachten (15-25 min)
+- [ ] ☕ Koffie/thee pakken
+- [ ] 📱 Check expo.dev/builds voor status
+- [ ] Wacht tot status = **Finished** (groen)
+
+### Downloaden & Installeren (5 min)
+- [ ] Download APK via QR code of direct link
+- [ ] Installeer op telefoon
+- [ ] Sta "onbekende bronnen" toe
+
+### Testen (2 min)
+- [ ] Open app → Monitor tab
+- [ ] Start Monitoring → geef microfoon permission
+- [ ] Check of QR code + 4-cijferige code verschijnt
+- [ ] **GEEN "werkt alleen in APK" melding!** ✅
+
+### Live Test (met 2e apparaat)
+- [ ] 2e telefoon: scan QR of voer code in
+- [ ] Praat in monitoring telefoon
+- [ ] Hoor audio op watching telefoon (<300ms!)
+- [ ] Check groene audio level bars
+- [ ] **SUCCES!** 🎉👶🎙️
 
 ---
 
@@ -294,6 +386,37 @@ Vereist Android Studio + Android SDK.
 
 ---
 
-**Succes met je real-time babyfoon!** 👶🎙️✨
+---
 
-Bij vragen: check Expo forums of Agora docs!
+## 📞 HULP NODIG?
+
+**Als het misgaat vanavond:**
+
+1. **Check de build logs** op expo.dev/builds
+2. **Google de error message**
+3. **Probeer `--clear-cache` flag**
+4. **Post in Expo Discord** (https://chat.expo.dev/)
+
+**Specifieke problemen:**
+- Agora SDK errors → https://docs.agora.io/en/help/integration-issues
+- EAS Build fails → https://docs.expo.dev/build-reference/troubleshooting/
+- React Native errors → https://reactnative.dev/docs/troubleshooting
+
+---
+
+## 🎯 VERWACHTE RESULTAAT
+
+**Na vanavond heb je:**
+- ✅ Werkende development build APK
+- ✅ Real-time babyfoon met <300ms latency
+- ✅ QR code sharing tussen apparaten
+- ✅ Audio visualisatie en alerts
+- ✅ Alle tracking features (sleep, feeding, etc.)
+
+**Totale tijd:** ~45 min (waarvan 20 min wachten op build)
+
+---
+
+**Succes vanavond!** 🚀👶🎙️
+
+*Laatste update: 23 december 2025*

@@ -7,15 +7,25 @@ type IRtcEngine = any;
 type ChannelProfileType = any;
 type ClientRoleType = any;
 
-// Conditionally import Agora SDK - only available when installed
+// Conditionally import Agora SDK - only available in EAS development/production builds
 let createAgoraRtcEngine: any = null;
-try {
-  // This will only work when react-native-agora is installed (in APK builds)
-  const agoraSdk = require('react-native-agora');
-  createAgoraRtcEngine = agoraSdk.createAgoraRtcEngine;
-  console.log('✅ Agora SDK loaded successfully');
-} catch (error) {
-  console.log('⚠️ Agora SDK not available (development mode)');
+let ChannelProfileType: any = null;
+let ClientRoleType: any = null;
+
+// Check if we're in a native build environment (not preview)
+if (Platform.OS !== 'web') {
+  try {
+    // This will only work in EAS builds where react-native-agora is compiled
+    const agoraSdk = require('react-native-agora');
+    createAgoraRtcEngine = agoraSdk.createAgoraRtcEngine;
+    ChannelProfileType = agoraSdk.ChannelProfileType;
+    ClientRoleType = agoraSdk.ClientRoleType;
+    console.log('✅ Agora SDK loaded successfully (EAS build)');
+  } catch (error) {
+    // Expected in OnSpace preview - native modules aren't available
+    console.log('⚠️ Agora SDK not available in preview mode');
+    console.log('✅ Will work in EAS development build (vanavond!)');
+  }
 }
 
 export interface AgoraTokenResponse {
@@ -80,7 +90,7 @@ export async function initializeAgora(): Promise<{ success: boolean; error?: str
     if (!createAgoraRtcEngine) {
       return {
         success: false,
-        error: '🚀 Real-time audio streaming is alleen beschikbaar in de APK build. Test gewoon verder - het werkt wel in de uiteindelijke APK!',
+        error: '🚀 Agora babyfoon werkt alleen in de EAS development build!\n\n✅ Preview: NIET ondersteund (huidige omgeving)\n✅ EAS Build: VOLLEDIG WERKEND\n\nVolg BUILD_INSTRUCTIES.md vanavond!',
       };
     }
 

@@ -42,7 +42,14 @@
           "backgroundColor": "#ffffff"
         }
       ],
-      "expo-web-browser"
+      "expo-web-browser",
+      [
+        "@config-plugins/react-native-agora",
+        {
+          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera for live streaming.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone for audio monitoring."
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
